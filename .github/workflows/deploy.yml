@@ -1,0 +1,49 @@
+name: Deploy to server # primera directiva
+
+# segunda directiva (Define los eventos)
+on: push # se puede poner directamente el nombre del evento o una lista de todos
+
+jobs: # en esta directiva se definen todos los jobs a ejecurtar
+  first_job: # se define un identificador
+    name: Primer job # se puede modificar lo que sale en el github actions con esta directriva
+    runs-on: ubuntu-latest # aca se define el runer
+    env: 
+      NAME: Prueba 1 # se pueden definir variables de entorno
+    # cada paso de este job se define en la directiva steps. Puede ser, ejecutar comandos en el runner o usar actions predefinidas
+    steps:
+      - name: Hola Mundo
+        run: echo "Hola Mundo" | ls -al
+      # para usar acticiones de github en lufgar de ejecutar se usa la directiva uses
+      - name: Action # esta es la mas utilizada y se usar para clonar y moverse al /root del repo
+        uses: actions/checkout@v4
+        # with: esta directiva se usa para pasar parametros a los actions que lo permitan 
+      - name: ls
+        run: ls -al
+      - name: Revisar
+        id: repo_path
+        run: echo "repo_dir=$(pwd)" >> $GITHUB_OUTPUT
+      # Para compartir informacion entre steps se puede usar la variable de entorno $GITHUB_OUTPUT, que basicamente apunta a un archivo donde insertar salidas y usarlas en algun otro lugar.
+      # Entonces, simplemente se debe direccionar las salidas hacia esa variable de entorno "command >> $GITHUB_OUTPUT"
+      # Y para usarlo, debemos llamar al contexto de stpes (El estep debe tener definida la directiva 'id') --> ${{ steps.[step-id].outputs.[varname]}}
+      - name: Obtener path
+        run: echo ${{ steps.repo_path.outputs.repo_dir}}
+      # Esta info vive a nivel de job, por lo que para compartir info entre diferentes jobs hace falta buscar otra forma. Una de ellas es usar la 
+      # directiva 'outputs', que permite definir informacion que se puede accerder fuera de el a traves de la interpolacioin del contexto "needs"
+    outputs:
+      salida: hola desde job 1
+
+  second_job: # se define un identificador para el segundo job
+    runs-on: ubuntu-latest # aca se define el runer
+    needs: first_job # esta directiva indica que antes de ejecutar este job, debe esperar la ejecucion del primero (se puede pasar una lista)
+    # if: false
+    # esta directiva me permite determinan cuando ejecutar o no este job, en este punto es importante manejar la infromacion
+    # de los CONTEXTOS/SECRETOS/ETC... de github-actions; https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/accessing-contextual-information-about-workflow-runs#about-contexts
+    # cada paso de este job se define en la directiva steps. Puede ser, ejecutar comandos en el runner o usar actions predefinidas
+    # aca se puede llamar la salida del primer job como variable de entorno
+    env:
+      SALIDA_J1: ${{ needs.first_job.outputs.salida }}
+    steps:
+      - name: Hola Mundo
+        run: echo "Hola Mundo 2"
+      - name: Mostrar info del job 1
+        run: echo $SALIDA_J1

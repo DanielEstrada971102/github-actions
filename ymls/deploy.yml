@@ -13,7 +13,7 @@ jobs: # en esta directiva se definen todos los jobs a ejecurtar
     steps:
       - name: Hola Mundo
         run: echo "Hola Mundo" | ls -al
-      # para usar acticiones de github en lufgar de ejecutar se usa la directiva uses
+      # para usar acciones de github en lugar de ejecutar se usa la directiva uses
       - name: Action # esta es la mas utilizada y se usar para clonar y moverse al /root del repo
         uses: actions/checkout@v4
         # with: esta directiva se usa para pasar parametros a los actions que lo permitan 
@@ -24,7 +24,8 @@ jobs: # en esta directiva se definen todos los jobs a ejecurtar
         run: echo "repo_dir=$(pwd)" >> $GITHUB_OUTPUT
       # Para compartir informacion entre steps se puede usar la variable de entorno $GITHUB_OUTPUT, que basicamente apunta a un archivo donde insertar salidas y usarlas en algun otro lugar.
       # Entonces, simplemente se debe direccionar las salidas hacia esa variable de entorno "command >> $GITHUB_OUTPUT"
-      # Y para usarlo, debemos llamar al contexto de stpes (El estep debe tener definida la directiva 'id') --> ${{ steps.[step-id].outputs.[varname]}}
+      # Y para usarlo, debemos llamar al CONTEXTO de steps (El step debe tener definida la directiva 'id') --> ${{ steps.[step-id].outputs.[varname]}}
+      # HAY CONTEXTOS DIFERENTES A NIVEL DE STEP, RUNNER, JOB, Etc...
       - name: Obtener path
         run: echo ${{ steps.repo_path.outputs.repo_dir}}
     # Esta info vive a nivel de job, por lo que para compartir info entre diferentes jobs hace falta buscar otra forma. Una de ellas es usar la 
@@ -37,7 +38,8 @@ jobs: # en esta directiva se definen todos los jobs a ejecurtar
     runs-on: ubuntu-latest # aca se define el runer
     needs: first_job # esta directiva indica que antes de ejecutar este job, debe esperar la ejecucion del primero (se puede pasar una lista)
     # if: false
-    # esta directiva me permite determinan cuando ejecutar o no este job, en este punto es importante manejar la infromacion
+    # if: ${{ github.ref == 'refs/heads/main' }}
+    # esta directiva me permite determinan cuando ejecutar o no este job (también se puede a nivel de steps), en este punto es importante manejar la infromacion
     # de los CONTEXTOS/SECRETOS/ETC... de github-actions; https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/accessing-contextual-information-about-workflow-runs#about-contexts
     # cada paso de este job se define en la directiva steps. Puede ser, ejecutar comandos en el runner o usar actions predefinidas
     # aca se puede llamar la salida del primer job como variable de entorno
@@ -48,3 +50,5 @@ jobs: # en esta directiva se definen todos los jobs a ejecurtar
         run: echo "Hola Mundo 2"
       - name: Mostrar info del job 1
         run: echo $SALIDA_J1
+
+    # OTRO CONCEPTO QUE PUEDE SER UTIL ES EL USO DE SECRETOS, PERO NO SE PROFUNDIZA EN ESTE APARTADO...

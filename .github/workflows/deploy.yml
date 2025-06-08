@@ -27,10 +27,11 @@ jobs: # en esta directiva se definen todos los jobs a ejecurtar
       # Y para usarlo, debemos llamar al contexto de stpes (El estep debe tener definida la directiva 'id') --> ${{ steps.[step-id].outputs.[varname]}}
       - name: Obtener path
         run: echo ${{ steps.repo_path.outputs.repo_dir}}
-      # Esta info vive a nivel de job, por lo que para compartir info entre diferentes jobs hace falta buscar otra forma. Una de ellas es usar la 
-      # directiva 'outputs', que permite definir informacion que se puede accerder fuera de el a traves de la interpolacioin del contexto "needs"
+    # Esta info vive a nivel de job, por lo que para compartir info entre diferentes jobs hace falta buscar otra forma. Una de ellas es usar la 
+    # directiva 'outputs', que permite definir informacion que se puede accerder fuera de el a traves de la interpolacioin del contexto "needs"
     outputs:
       salida: hola desde job 1
+    # OTRA OPCION Y MAS PODEROSA ES USAR ARTIFACS (ver el otro workflow)
 
   second_job: # se define un identificador para el segundo job
     runs-on: ubuntu-latest # aca se define el runer

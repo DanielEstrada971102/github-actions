@@ -1,0 +1,16 @@
+name: Strategy test
+
+on: push
+
+jobs:
+  j1:
+    name: job 1
+    runs-on: ubuntu-latest
+    
+    strategy: # esto sirve para automatizar la ejecucion de jobs con diferentes configuraciones o parametros
+      matrix:
+        message: ["Message 1", "Message 2", "Message 3"]
+
+    steps:
+      - name: Print message
+        run: echo "${{ matrix.message }}" # internamente se detecta que es un arreglo y se ejecuta 3 veces
